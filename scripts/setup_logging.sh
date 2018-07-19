@@ -26,7 +26,15 @@ if [ -z "$ARBITER" ]; then
   usage
 fi
 
-sudo apt-get install -y logrotate
+export LC_ALL=de_DE.UTF-8
+
+sudo mkdir -p /etc/awslogs
+sudo touch /etc/awslogs/awslogs.conf
+sudo chmod 0644 /etc/awslogs/awslogs.conf
+
+sudo touch /etc/logrotate.d/mongod
+
+sudo apt-get install -y logrotate python-minimal
 
 curl https://s3.amazonaws.com//aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -O
 sudo chmod +x ./awslogs-agent-setup.py
