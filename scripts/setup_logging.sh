@@ -1,9 +1,11 @@
 #!/bin/bash -xe
+usage() { echo "Usage: $0 [-a <0|1> -s <STACK_NAME>]" 1>&2; exit 1; }
 
-usage() { echo "Usage: $0 [-a <0|1>]" 1>&2; exit 1; }
-
-while getopts ":a:" OPTION; do
+while getopts ":s:a:" OPTION; do
     case $OPTION in
+        s)
+            STACK_NAME=$OPTARG
+            ;;
         a)
             ARBITER=$OPTARG # if we are setting data member or arbiter
             ((a == 0 || a == 1)) || usage
@@ -13,6 +15,11 @@ while getopts ":a:" OPTION; do
             ;;
     esac
 done
+
+if [ -z "$STACK_NAME" ]; then
+  echo "-s [option] is required"
+  usage
+fi
 
 if [ -z "$ARBITER" ]; then
   echo "-a [option] is required"
@@ -25,20 +32,20 @@ curl https://s3.amazonaws.com//aws-cloudwatch/downloads/latest/awslogs-agent-set
 sudo chmod +x ./awslogs-agent-setup.py
 
 if [ "$ARBITER" = "1" ]; then
-sudo tee /etc/awslogs/awslogs.conf <<'EOF'
+sudo tee /etc/awslogs/awslogs.conf <<EOF
 [general]
 state_file = /var/awslogs/state/agent-state
 
 [/var/log/messages]
 file = /var/log/messages
-log_group_name = ${AWS::StackName}-/var/log/messages
-log_stream_name = ${AWS::StackName}
+log_group_name = ${STACK_NAME}-/var/log/messages
+log_stream_name = ${STACK_NAME}
 datetime_format = %b %d %H:%M:%S
 
 [/var/log/mongodb/mongod.log]
 file = /var/log/mongodb/mongod.log
-log_group_name = ${AWS::StackName}-/var/log/mongodb/mongod.log
-log_stream_name = ${AWS::StackName}
+log_group_name = ${STACK_NAME}-/var/log/mongodb/mongod.log
+log_stream_name = ${STACK_NAME}
 datetime_format = %a %b %d %H:%M:%S.%f
 EOF
 
@@ -60,20 +67,20 @@ EOF
 
 else
 
-sudo tee /etc/awslogs/awslogs.conf <<'EOF'
+sudo tee /etc/awslogs/awslogs.conf <<EOF
 [general]
 state_file = /var/awslogs/state/agent-state
 
 [/var/log/messages]
 file = /var/log/messages
-log_group_name = ${AWS::StackName}-/var/log/messages
-log_stream_name = ${AWS::StackName}
+log_group_name = ${STACK_NAME}-/var/log/messages
+log_stream_name = ${STACK_NAME}
 datetime_format = %b %d %H:%M:%S
 
 [/mnt/storage/mongodb/logs/mongod.log]
 file = /mnt/storage/mongodb/logs/mongod.log
-log_group_name = ${AWS::StackName}-/mnt/storage/mongodb/logs/mongod.log
-log_stream_name = ${AWS::StackName}
+log_group_name = ${STACK_NAME}-/mnt/storage/mongodb/logs/mongod.log
+log_stream_name = ${STACK_NAME}
 datetime_format = %a %b %d %H:%M:%S.%f
 EOF
 
