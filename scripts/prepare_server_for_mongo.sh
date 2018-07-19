@@ -2,7 +2,7 @@
 
 usage() { echo "Usage: $0 [-d <MEMBER_DOMAIN_NAME>] [-a <0|1>]" 1>&2; exit 1; }
 
-while getopts ":d:" OPTION; do
+while getopts ":d:a:" OPTION; do
     case $OPTION in
         d)
             DOMAIN=$OPTARG
