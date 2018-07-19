@@ -1,11 +1,15 @@
 #!/bin/bash -xe
 
-usage() { echo "Usage: $0 [-d <MEMBER_DOMAIN_NAME>]" 1>&2; exit 1; }
+usage() { echo "Usage: $0 [-d <MEMBER_DOMAIN_NAME>] [-a <0|1>]" 1>&2; exit 1; }
 
 while getopts ":d:" OPTION; do
     case $OPTION in
         d)
             DOMAIN=$OPTARG
+            ;;
+        a)
+            ARBITER=$OPTARG # if we are setting data member or arbiter
+            ((a == 0 || a == 1)) || usage
             ;;
         *)
             usage
@@ -18,9 +22,15 @@ if [ -z "$DOMAIN" ]; then
   usage
 fi
 
+if [ -z "$ARBITER" ]; then
+  echo "-a [option] is required"
+  usage
+fi
+
 export LANGUAGE=de_DE.UTF-8 && export LANG=de_DE.UTF-8 && export LC_ALL=de_DE.UTF-8 && sudo locale-gen de_DE.UTF-8
 sudo dpkg-reconfigure --frontend=noninteractive locales
 
+if [ "$ARBITER" = "1" ]; then
 sudo fdisk /dev/xvdb <<EOF
 n
 p
@@ -35,6 +45,7 @@ sudo mkfs.xfs -f /dev/xvdb1
 sudo mkdir -p /mnt/storage
 sudo mount -t xfs /dev/xvdb1 /mnt/storage
 sudo df -Th /mnt/storage
+fi
 
 echo "$DOMAIN" | sudo tee /etc/hostname > /dev/null
 sudo hostname -F /etc/hostname
@@ -107,6 +118,7 @@ echo -n "0" | sudo tee --append /etc/fstab > /dev/null
 echo -e -n "\t" | sudo tee --append /etc/fstab > /dev/null
 echo "0" | sudo tee --append /etc/fstab > /dev/null
 
+if [ "$ARBITER" = "1" ]; then
 echo -n "/dev/xvdb1" | sudo tee --append /etc/fstab > /dev/null
 echo -e -n "\t" | sudo tee --append /etc/fstab > /dev/null
 echo -n "/mnt/storage" | sudo tee --append /etc/fstab > /dev/null
@@ -118,12 +130,19 @@ echo -e -n "\t" | sudo tee --append /etc/fstab > /dev/null
 echo -n "0" | sudo tee --append /etc/fstab > /dev/null
 echo -e -n "\t" | sudo tee --append /etc/fstab > /dev/null
 echo "0" | sudo tee --append /etc/fstab > /dev/null
+fi
 
 sudo touch /var/spool/cron/crontabs/ubuntu
 
+if [ "$ARBITER" = "1" ]; then
+sudo tee -a /var/spool/cron/crontabs/ubuntu <<EOF
+@reboot /sbin/blockdev --setra 32 /dev/xvda1
+EOF
+else
 sudo tee -a /var/spool/cron/crontabs/ubuntu <<EOF
 @reboot /sbin/blockdev --setra 32 /dev/xvda1
 @reboot /sbin/blockdev --setra 32 /dev/xvdb1
 EOF
+fi
 
 sudo chown -R ubuntu:ubuntu /var/spool/cron/crontabs/ubuntu
