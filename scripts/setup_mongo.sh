@@ -142,6 +142,7 @@ else
     AWS_REGION=$(curl -s 169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//')
     sudo openssl rand -base64 741 > keyFile
     sudo cp keyFile /mnt/storage/mongodb
+    sudo rm -rf keyFile
     aws s3 cp /mnt/storage/mongodb/keyFile s3://${S3_BUCKET_NAME}/keys/keyFile --region $AWS_REGION
 fi
 
