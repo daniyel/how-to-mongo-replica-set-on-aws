@@ -39,3 +39,14 @@ $ sudo ./setup_mongo.sh -r myReplica -k 0 -b my-s3-bucket -a 1
 ```
 
 ## How to use `setup_logging.sh`
+This script will setup log rotation and aws logs. Options `-s` mean stack name and it will be used for log group and stream name. Copy script to Ubuntu server and run on data member as follows:
+
+```
+$ sudo ./setup_log.sh -s MyMongoReplicaSetMember1 -a 0
+```
+
+for arbiter run as:
+
+```
+$ sudo ./setup_log.sh -s MyMongoReplicaSetArbiter -a 1
+```
