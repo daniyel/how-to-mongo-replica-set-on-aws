@@ -50,3 +50,23 @@ for arbiter run as:
 ```
 $ sudo ./setup_log.sh -s MyMongoReplicaSetArbiter -a 1
 ```
+
+## How to use `setup_cw_metrics.sh`
+Before you can run and set CloudWatch metrics your instances should have some policies attached to the role that EC2 instances are using:
+
+* cloudwatch:PutMetricData
+* cloudwatch:GetMetricStatistics
+* cloudwatch:ListMetrics
+* ec2:DescribeTags
+
+Copy script to server, make it executable and run as:
+
+```
+$ ./setup_cw_metrics.sh -a 0
+```
+
+for arbiter run as:
+
+```
+$ ./setup_cw_metrics.sh -a 1
+```
