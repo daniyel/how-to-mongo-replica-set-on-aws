@@ -70,3 +70,5 @@ for arbiter run as:
 ```
 $ ./setup_cw_metrics.sh -a 1
 ```
+
+For some reason you need to execute `crontab -e` manually, for crontab changes to take effect.
