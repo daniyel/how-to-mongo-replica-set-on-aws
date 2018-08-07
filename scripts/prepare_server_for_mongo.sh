@@ -1,8 +1,8 @@
 #!/bin/bash -xe
 
-usage() { echo "Usage: $0 [-d <MEMBER_DOMAIN_NAME>] [-a <0|1>]" 1>&2; exit 1; }
+usage() { echo "Usage: $0 -d <MEMBER_DOMAIN_NAME> -a <0|1> -i <INSTANCE_TYPE>" 1>&2; exit 1; }
 
-while getopts ":d:a:" OPTION; do
+while getopts ":d:a:i:" OPTION; do
     case $OPTION in
         d)
             DOMAIN=$OPTARG
@@ -10,6 +10,9 @@ while getopts ":d:a:" OPTION; do
         a)
             ARBITER=$OPTARG # if we are setting data member or arbiter
             ((a == 0 || a == 1)) || usage
+            ;;
+        i)
+            INSTANCE_TYPE=$OPTARG
             ;;
         *)
             usage
@@ -27,11 +30,29 @@ if [ -z "$ARBITER" ]; then
   usage
 fi
 
+if [ -z "$INSTANCE_TYPE" ]; then
+  echo "-i [option] is required"
+  usage
+fi
+
 export LANGUAGE=de_DE.UTF-8 && export LANG=de_DE.UTF-8 && export LC_ALL=de_DE.UTF-8 && sudo locale-gen de_DE.UTF-8
 sudo dpkg-reconfigure --frontend=noninteractive locales
 
-if [ "$ARBITER" = "1" ]; then
-sudo fdisk /dev/xvdb <<EOF
+if [ "$INSTANCE_TYPE" == "m4" ]; then
+    DEVICE=/dev/xvdb
+    ROOT_PARTITION=/dev/xvda1
+    PARTITION=/dev/xvdb1
+elif [ "$INSTANCE_TYPE" == "m5" ]; then
+    DEVICE=/dev/nvme1n1
+    ROOT_PARTITION=/dev/nvme0n1p1
+    PARTITION=/dev/nvme1n1p1
+else
+    echo "Unknown instance $INSTANCE_TYPE. Supported are m4 and m5."
+    usage
+fi
+
+if [ "$ARBITER" = "0" ]; then
+sudo fdisk $DEVICE <<EOF
 n
 p
 1
@@ -41,9 +62,9 @@ p
 w
 EOF
 
-sudo mkfs.xfs -f /dev/xvdb1
+sudo mkfs.xfs -f $PARTITION
 sudo mkdir -p /mnt/storage
-sudo mount -t xfs /dev/xvdb1 /mnt/storage
+sudo mount -t xfs $PARTITION /mnt/storage
 sudo df -Th /mnt/storage
 fi
 
@@ -119,7 +140,7 @@ echo -e -n "\t" | sudo tee --append /etc/fstab > /dev/null
 echo "0" | sudo tee --append /etc/fstab > /dev/null
 
 if [ "$ARBITER" = "1" ]; then
-echo -n "/dev/xvdb1" | sudo tee --append /etc/fstab > /dev/null
+echo -n "$PARTITION" | sudo tee --append /etc/fstab > /dev/null
 echo -e -n "\t" | sudo tee --append /etc/fstab > /dev/null
 echo -n "/mnt/storage" | sudo tee --append /etc/fstab > /dev/null
 echo -e -n "\t" | sudo tee --append /etc/fstab > /dev/null
@@ -134,14 +155,14 @@ fi
 
 sudo touch /var/spool/cron/crontabs/ubuntu
 
-if [ "$ARBITER" = "1" ]; then
+if [ "$ARBITER" = "0" ]; then
 sudo tee -a /var/spool/cron/crontabs/ubuntu <<EOF
-@reboot /sbin/blockdev --setra 32 /dev/xvda1
+@reboot /sbin/blockdev --setra 32 $ROOT_PARTITION
 EOF
 else
 sudo tee -a /var/spool/cron/crontabs/ubuntu <<EOF
-@reboot /sbin/blockdev --setra 32 /dev/xvda1
-@reboot /sbin/blockdev --setra 32 /dev/xvdb1
+@reboot /sbin/blockdev --setra 32 $ROOT_PARTITION
+@reboot /sbin/blockdev --setra 32 $PARTITION
 EOF
 fi
 
