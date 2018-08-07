@@ -51,7 +51,7 @@ else
     usage
 fi
 
-if [ "$ARBITER" = "1" ]; then
+if [ "$ARBITER" = "0" ]; then
 sudo fdisk $DEVICE <<EOF
 n
 p
@@ -139,7 +139,7 @@ echo -n "0" | sudo tee --append /etc/fstab > /dev/null
 echo -e -n "\t" | sudo tee --append /etc/fstab > /dev/null
 echo "0" | sudo tee --append /etc/fstab > /dev/null
 
-if [ "$ARBITER" = "1" ]; then
+if [ "$ARBITER" = "0" ]; then
 echo -n "$PARTITION" | sudo tee --append /etc/fstab > /dev/null
 echo -e -n "\t" | sudo tee --append /etc/fstab > /dev/null
 echo -n "/mnt/storage" | sudo tee --append /etc/fstab > /dev/null
@@ -155,7 +155,7 @@ fi
 
 sudo touch /var/spool/cron/crontabs/ubuntu
 
-if [ "$ARBITER" = "1" ]; then
+if [ "$ARBITER" = "0" ]; then
 sudo tee -a /var/spool/cron/crontabs/ubuntu <<EOF
 @reboot /sbin/blockdev --setra 32 $ROOT_PARTITION
 @reboot /sbin/blockdev --setra 32 $PARTITION
