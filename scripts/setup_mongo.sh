@@ -56,7 +56,7 @@ sudo apt-get install -y awscli mongodb-org
 if [ "$ARBITER" = "1"]; then
 
 AWS_REGION=$(curl -s 169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//')
-aws s3 cp s3://${S3_BUCKET_NAME}/keys/keyFile /opt/mongodb/keyFile --region $AWS_REGION
+sudo aws s3 cp s3://${S3_BUCKET_NAME}/keys/keyFile /opt/mongodb/keyFile --region $AWS_REGION
 
 # Set the ownership and permissions of the keyfile to mongodb
 sudo chown mongodb:mongodb /opt/mongodb/keyFile
