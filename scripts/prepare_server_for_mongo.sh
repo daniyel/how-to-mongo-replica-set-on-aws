@@ -51,7 +51,7 @@ else
     usage
 fi
 
-if [ "$ARBITER" = "0" ]; then
+if [ "$ARBITER" = "1" ]; then
 sudo fdisk $DEVICE <<EOF
 n
 p
@@ -155,14 +155,14 @@ fi
 
 sudo touch /var/spool/cron/crontabs/ubuntu
 
-if [ "$ARBITER" = "0" ]; then
+if [ "$ARBITER" = "1" ]; then
 sudo tee -a /var/spool/cron/crontabs/ubuntu <<EOF
 @reboot /sbin/blockdev --setra 32 $ROOT_PARTITION
+@reboot /sbin/blockdev --setra 32 $PARTITION
 EOF
 else
 sudo tee -a /var/spool/cron/crontabs/ubuntu <<EOF
 @reboot /sbin/blockdev --setra 32 $ROOT_PARTITION
-@reboot /sbin/blockdev --setra 32 $PARTITION
 EOF
 fi
 
