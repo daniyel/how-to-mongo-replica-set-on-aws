@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 
-usage() { echo "Usage: $0 [-r <REPLICA_SET_NAME>] [-k <0|1>] [-b <S3_BUCKET>] [-a <0|1>]" 1>&2; exit 1; }
+usage() { echo "Usage: $0 -r <REPLICA_SET_NAME> -k <0|1> -b <S3_BUCKET> -a <0|1>" 1>&2; exit 1; }
 
 while getopts ":r:k:b:a:" OPTION; do
     case $OPTION in
