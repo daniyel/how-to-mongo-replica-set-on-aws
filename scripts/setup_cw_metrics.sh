@@ -1,12 +1,15 @@
 #!/bin/bash -xe
 
-usage() { echo "Usage: $0 [-a <0|1>]" 1>&2; exit 1; }
+usage() { echo "Usage: $0 -a <0|1> -i <INSTANCE_TYPE>" 1>&2; exit 1; }
 
-while getopts ":a:" OPTION; do
+while getopts ":a:i:" OPTION; do
     case $OPTION in
         a)
             ARBITER=$OPTARG # if we are setting data member or arbiter
             ((a == 0 || a == 1)) || usage
+            ;;
+        i)
+            INSTANCE_TYPE=$OPTARG
             ;;
         *)
             usage
@@ -16,6 +19,11 @@ done
 
 if [ -z "$ARBITER" ]; then
   echo "-a [option] is required"
+  usage
+fi
+
+if [ -z "$INSTANCE_TYPE" ]; then
+  echo "-i [option] is required"
   usage
 fi
 
