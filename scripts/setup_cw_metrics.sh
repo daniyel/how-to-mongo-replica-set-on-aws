@@ -27,6 +27,17 @@ if [ -z "$INSTANCE_TYPE" ]; then
   usage
 fi
 
+if [ "$INSTANCE_TYPE" == "m4" ]; then
+    ROOT_PARTITION=/dev/xvda1
+    PARTITION=/dev/xvdb1
+elif [ "$INSTANCE_TYPE" == "m5" ]; then
+    ROOT_PARTITION=/dev/nvme0n1p1
+    PARTITION=/dev/nvme1n1p1
+else
+    echo "Unknown instance $INSTANCE_TYPE. Supported are m4 and m5."
+    usage
+fi
+
 if ! grep -q "LANGUAGE" ~/.bash_profile; then
 tee ~/.bash_profile <<EOF
 PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
@@ -51,14 +62,14 @@ cd aws-scripts-mon
 if [ "$ARBITER" = "1" ]; then
 
 sudo tee -a /var/spool/cron/crontabs/ubuntu <<EOF
-*/5 * * * * /home/ubuntu/aws-scripts-mon/mon-put-instance-data.pl --mem-used-incl-cache-buff --mem-util --disk-space-util --disk-path=/dev/xvda1 --from-cron
+*/5 * * * * /home/ubuntu/aws-scripts-mon/mon-put-instance-data.pl --mem-used-incl-cache-buff --mem-util --disk-space-util --disk-path=$ROOT_PARTITION --from-cron
 EOF
 
 else
 
 sudo tee -a /var/spool/cron/crontabs/ubuntu <<EOF
-*/5 * * * * /home/ubuntu/aws-scripts-mon/mon-put-instance-data.pl --mem-used-incl-cache-buff --mem-util --disk-space-util --disk-path=/dev/xvda1 --from-cron
-*/5 * * * * /home/ubuntu/aws-scripts-mon/mon-put-instance-data.pl --mem-used-incl-cache-buff --mem-util --disk-space-util --disk-path=/dev/xvdb1 --from-cron
+*/5 * * * * /home/ubuntu/aws-scripts-mon/mon-put-instance-data.pl --mem-used-incl-cache-buff --mem-util --disk-space-util --disk-path=$ROOT_PARTITION --from-cron
+*/5 * * * * /home/ubuntu/aws-scripts-mon/mon-put-instance-data.pl --mem-used-incl-cache-buff --mem-util --disk-space-util --disk-path=$PARTITION --from-cron
 EOF
 
 fi
