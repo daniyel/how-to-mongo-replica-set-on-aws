@@ -1,5 +1,5 @@
 #!/bin/bash -xe
-usage() { echo "Usage: $0 [-a <0|1> -s <STACK_NAME>]" 1>&2; exit 1; }
+usage() { echo "Usage: $0 -a <0|1> -s <STACK_NAME>" 1>&2; exit 1; }
 
 while getopts ":s:a:" OPTION; do
     case $OPTION in
