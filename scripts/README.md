@@ -5,13 +5,13 @@ Run script as a sudo.
 To prepare server for data member you should execute script as follows:
 
 ```
-$ sudo ./prepare_server_for_mongo.sh -d mongodb1.mydomain.org -a 0
+$ sudo ./prepare_server_for_mongo.sh -d mongodb1.mydomain.org -a 0 -i m4
 ```
 
 To execute script on server that will be eventually arbiter you should execute as:
 
 ```
-$ sudo ./prepare_server_for_mongo.sh -d mongodb1.mydomain.org -a 1
+$ sudo ./prepare_server_for_mongo.sh -d mongodbarb.mydomain.org -a 1 -i m4
 ```
 
 After the script finishes you can check, if everything went ok by executing `sudo mount -a` and by data member we should check, if additional volume that we mounted to the EC2 is really xfs. For that we can use `df -Th /mnt/storage` command.
