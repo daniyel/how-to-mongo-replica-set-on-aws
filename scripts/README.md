@@ -62,13 +62,13 @@ Before you can run and set CloudWatch metrics your instances should have some po
 Copy script to server, make it executable and run as:
 
 ```
-$ ./setup_cw_metrics.sh -a 0
+$ ./setup_cw_metrics.sh -a 0 -i m4
 ```
 
 for arbiter run as:
 
 ```
-$ ./setup_cw_metrics.sh -a 1
+$ ./setup_cw_metrics.sh -a 1 -i m4
 ```
 
 For some reason you need to execute `crontab -e` manually, for crontab changes to take effect.
